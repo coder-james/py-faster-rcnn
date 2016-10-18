@@ -1,6 +1,5 @@
 ### Disclaimer
 
-This repository contains a Python *reimplementation* of the MATLAB code.
 This Python implementation is built on a fork of [Fast R-CNN](https://github.com/rbgirshick/fast-rcnn).
 There are slight differences between the two implementations.
 In particular, this Python port
