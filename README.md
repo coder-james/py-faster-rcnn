@@ -1,8 +1,5 @@
 ### Disclaimer
 
-The official Faster R-CNN code (written in MATLAB) is available [here](https://github.com/ShaoqingRen/faster_rcnn).
-If your goal is to reproduce the results in our NIPS 2015 paper, please use the [official code](https://github.com/ShaoqingRen/faster_rcnn).
-
 This repository contains a Python *reimplementation* of the MATLAB code.
 This Python implementation is built on a fork of [Fast R-CNN](https://github.com/rbgirshick/fast-rcnn).
 There are slight differences between the two implementations.
