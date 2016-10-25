@@ -1,35 +1,41 @@
 # --------------------------------------------------------
 # Fast R-CNN
-# Copyright (c) 2015 Microsoft
+# Copyright (c) 2016 Peking University
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ross Girshick
+# Updated by coder-james
 # --------------------------------------------------------
 
 """Factory method for easily getting imdbs by name."""
 
 __sets = {}
 
-from datasets.pascal_voc import pascal_voc
-from datasets.coco import coco
+#from datasets.pascal_voc import pascal_voc
+#from datasets.coco import coco
+from datasets.common import common
 import numpy as np
 
 # Set up voc_<year>_<split> using selective search "fast" mode
-for year in ['2007', '2012']:
-    for split in ['train', 'val', 'trainval', 'test']:
-        name = 'voc_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year: pascal_voc(split, year))
+#for year in ['2007', '2012']:
+#    for split in ['train', 'val', 'trainval', 'test']:
+#        name = 'voc_{}_{}'.format(year, split)
+#        __sets[name] = (lambda split=split, year=year: pascal_voc(split, year))
 
 # Set up coco_2014_<split>
-for year in ['2014']:
-    for split in ['train', 'val', 'minival', 'valminusminival']:
-        name = 'coco_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year: coco(split, year))
+#for year in ['2014']:
+#    for split in ['train', 'val', 'minival', 'valminusminival']:
+#        name = 'coco_{}_{}'.format(year, split)
+#        __sets[name] = (lambda split=split, year=year: coco(split, year))
 
 # Set up coco_2015_<split>
-for year in ['2015']:
-    for split in ['test', 'test-dev']:
-        name = 'coco_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year: coco(split, year))
+#for year in ['2015']:
+#    for split in ['test', 'test-dev']:
+#        name = 'coco_{}_{}'.format(year, split)
+#        __sets[name] = (lambda split=split, year=year: coco(split, year))
+
+#add your datasets below here
+name = "something"
+__sets["pedestrian"] = (lambda name = name: common(name))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
