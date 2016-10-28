@@ -1,4 +1,0 @@
-[submodule "caffe"]
-	path = caffe
-	url = https://github.com/Microsoft/caffe.git
-	branch =  master
