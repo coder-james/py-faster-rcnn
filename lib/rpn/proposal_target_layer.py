@@ -22,19 +22,19 @@ class ProposalTargetLayer(caffe.Layer):
     """
 
     def setup(self, bottom, top):
-        layer_params = yaml.load(self.param_str_)
+        layer_params = yaml.load(self.param_str)
         self._num_classes = layer_params['num_classes']
 
         # sampled rois (0, x1, y1, x2, y2)
-        top[0].reshape(1, 5)
+        top[0].reshape(1, 5, 1, 1)
         # labels
-        top[1].reshape(1, 1)
+        top[1].reshape(1, 1, 1, 1)
         # bbox_targets
-        top[2].reshape(1, self._num_classes * 4)
+        top[2].reshape(1, self._num_classes * 4, 1, 1)
         # bbox_inside_weights
-        top[3].reshape(1, self._num_classes * 4)
+        top[3].reshape(1, self._num_classes * 4, 1, 1)
         # bbox_outside_weights
-        top[4].reshape(1, self._num_classes * 4)
+        top[4].reshape(1, self._num_classes * 4, 1, 1)
 
     def forward(self, bottom, top):
         # Proposal ROIs (0, x1, y1, x2, y2) coming from RPN
@@ -55,12 +55,12 @@ class ProposalTargetLayer(caffe.Layer):
         assert np.all(all_rois[:, 0] == 0), \
                 'Only single item batches are supported'
 
-        num_images = 1
-        rois_per_image = cfg.TRAIN.BATCH_SIZE / num_images
+        rois_per_image = np.inf if cfg.TRAIN.BATCH_SIZE == -1 else cfg.TRAIN.BATCH_SIZE
         fg_rois_per_image = np.round(cfg.TRAIN.FG_FRACTION * rois_per_image)
 
         # Sample rois with classification labels and bounding box regression
         # targets
+        # print 'proposal_target_layer:', fg_rois_per_image
         labels, rois, bbox_targets, bbox_inside_weights = _sample_rois(
             all_rois, gt_boxes, fg_rois_per_image,
             rois_per_image, self._num_classes)
@@ -76,22 +76,32 @@ class ProposalTargetLayer(caffe.Layer):
             print 'ratio: {:.3f}'.format(float(self._fg_num) / float(self._bg_num))
 
         # sampled rois
+        # modified by ywxiong
+        rois = rois.reshape((rois.shape[0], rois.shape[1], 1, 1))
         top[0].reshape(*rois.shape)
         top[0].data[...] = rois
 
         # classification labels
+        # modified by ywxiong
+        labels = labels.reshape((labels.shape[0], 1, 1, 1))
         top[1].reshape(*labels.shape)
         top[1].data[...] = labels
 
         # bbox_targets
+        # modified by ywxiong
+        bbox_targets = bbox_targets.reshape((bbox_targets.shape[0], bbox_targets.shape[1], 1, 1))
         top[2].reshape(*bbox_targets.shape)
         top[2].data[...] = bbox_targets
 
         # bbox_inside_weights
+        # modified by ywxiong
+        bbox_inside_weights = bbox_inside_weights.reshape((bbox_inside_weights.shape[0], bbox_inside_weights.shape[1], 1, 1))
         top[3].reshape(*bbox_inside_weights.shape)
         top[3].data[...] = bbox_inside_weights
 
         # bbox_outside_weights
+        # modified by ywxiong
+        bbox_inside_weights = bbox_inside_weights.reshape((bbox_inside_weights.shape[0], bbox_inside_weights.shape[1], 1, 1))
         top[4].reshape(*bbox_inside_weights.shape)
         top[4].data[...] = np.array(bbox_inside_weights > 0).astype(np.float32)
 
@@ -118,14 +128,23 @@ def _get_bbox_regression_labels(bbox_target_data, num_classes):
 
     clss = bbox_target_data[:, 0]
     bbox_targets = np.zeros((clss.size, 4 * num_classes), dtype=np.float32)
+    # print 'proposal_target_layer:', bbox_targets.shape
     bbox_inside_weights = np.zeros(bbox_targets.shape, dtype=np.float32)
     inds = np.where(clss > 0)[0]
-    for ind in inds:
-        cls = clss[ind]
-        start = 4 * cls
-        end = start + 4
-        bbox_targets[ind, start:end] = bbox_target_data[ind, 1:]
-        bbox_inside_weights[ind, start:end] = cfg.TRAIN.BBOX_INSIDE_WEIGHTS
+    if cfg.TRAIN.AGONISTIC:
+        for ind in inds:
+            cls = clss[ind]
+            start = 4 * (1 if cls > 0 else 0)
+            end = start + 4
+            bbox_targets[ind, start:end] = bbox_target_data[ind, 1:]
+            bbox_inside_weights[ind, start:end] = cfg.TRAIN.BBOX_INSIDE_WEIGHTS
+    else:
+        for ind in inds:
+            cls = clss[ind]
+            start = 4 * cls
+            end = start + 4
+            bbox_targets[ind, start:end] = bbox_target_data[ind, 1:]
+            bbox_inside_weights[ind, start:end] = cfg.TRAIN.BBOX_INSIDE_WEIGHTS
     return bbox_targets, bbox_inside_weights
 
 
@@ -178,15 +197,19 @@ def _sample_rois(all_rois, gt_boxes, fg_rois_per_image, rois_per_image, num_clas
 
     # The indices that we're selecting (both fg and bg)
     keep_inds = np.append(fg_inds, bg_inds)
+    # print 'proposal_target_layer:', keep_inds
+    
     # Select sampled values from various arrays:
     labels = labels[keep_inds]
     # Clamp labels for the background RoIs to 0
     labels[fg_rois_per_this_image:] = 0
     rois = all_rois[keep_inds]
-
+    
+    # print 'proposal_target_layer:', rois
     bbox_target_data = _compute_targets(
         rois[:, 1:5], gt_boxes[gt_assignment[keep_inds], :4], labels)
 
+    # print 'proposal_target_layer:', bbox_target_data
     bbox_targets, bbox_inside_weights = \
         _get_bbox_regression_labels(bbox_target_data, num_classes)
 
