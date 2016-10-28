@@ -11,6 +11,7 @@ import caffe
 from fast_rcnn.config import cfg
 import roi_data_layer.roidb as rdl_roidb
 from utils.timer import Timer
+import time as t
 import numpy as np
 import os
 
@@ -119,18 +120,23 @@ class SolverWrapper(object):
         last_snapshot_iter = -1
         timer = Timer()
         model_paths = []
+        lossfile = open(str(t.time()) + ".txt","w")
         while self.solver.iter < max_iters:
             # Make one SGD update
             timer.tic()
             self.solver.step(1)
             timer.toc()
             if self.solver.iter % (10 * self.solver_param.display) == 0:
+	        """save loss data"""
+                net = self.solver.net
+                lossfile.write("%s,%s,%s,%s\n" %(net.blobs["loss_cls"].data, net.blobs["loss_bbox"].data, net.blobs["rpn_loss_cls"].data, net.blobs["rpn_loss_bbox"].data))
                 print 'speed: {:.3f}s / iter'.format(timer.average_time)
 
             if self.solver.iter % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = self.solver.iter
                 model_paths.append(self.snapshot())
 
+        lossfile.close()
         if last_snapshot_iter != self.solver.iter:
             model_paths.append(self.snapshot())
         return model_paths
