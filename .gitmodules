@@ -1,4 +1,4 @@
-[submodule "caffe-fast-rcnn"]
-	path = caffe-fast-rcnn
-	url = https://github.com/coder-james/caffe.git
-	branch =  my-caffe
+[submodule "caffe"]
+	path = caffe
+	url = https://github.com/Microsoft/caffe.git
+	branch =  master
