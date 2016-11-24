@@ -1,8 +1,8 @@
 # R-CN (Faster-RCNN & R-FCN)
 
-##By coder-james
+####By coder-james
 
-"Two Fantastic Great Work!"
+"Two Fantastic Great Jobs!"
 
 Please see original README.md for details.
 
