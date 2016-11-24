@@ -34,9 +34,9 @@ case $DATASET in
     # You can probably use fewer iterations and reduce the
     # time to the LR drop (set in the solver to 350,000 iterations).
     TRAIN_IMDB="coco_2014_train"
-    TEST_IMDB="coco_2014_minival"
+    TEST_IMDB="coco_2014_val"
     PT_DIR="coco"
-    ITERS=490000
+    ITERS=960000
     ;;
   *)
     echo "No dataset given"
@@ -61,7 +61,7 @@ NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print
 set -x
 
 time ./tools/test_net.py --gpu ${GPU_ID} \
-  --def models/${PT_DIR}/${NET}/rfcn_end2end/test_agonistic.prototxt \
+  --def models/${PT_DIR}/${NET}/rfcn_end2end/test_agnostic.prototxt \
   --net ${NET_FINAL} \
   --imdb ${TEST_IMDB} \
   --cfg experiments/cfgs/rfcn_end2end.yml \

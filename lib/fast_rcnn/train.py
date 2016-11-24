@@ -11,7 +11,6 @@ import caffe
 from fast_rcnn.config import cfg
 import roi_data_layer.roidb as rdl_roidb
 from utils.timer import Timer
-import time as t
 import numpy as np
 import os
 
@@ -67,6 +66,9 @@ class SolverWrapper(object):
                              cfg.TRAIN.BBOX_NORMALIZE_TARGETS and
                              net.params.has_key('rfcn_bbox'))
 
+        scale_bbox_params_rpn = (cfg.TRAIN.RPN_NORMALIZE_TARGETS and
+                                 net.params.has_key('rpn_bbox_pred'))
+
         if scale_bbox_params_faster_rcnn:
             # save original values
             orig_0 = net.params['bbox_pred'][0].data.copy()
@@ -80,13 +82,27 @@ class SolverWrapper(object):
                     (net.params['bbox_pred'][1].data *
                      self.bbox_stds + self.bbox_means)
 
+        if scale_bbox_params_rpn:
+            orig_0 = net.params['rpn_bbox_pred'][0].data.copy()
+            orig_1 = net.params['rpn_bbox_pred'][1].data.copy()
+            num_anchor = orig_0.shape[0] / 4
+            # scale and shift with bbox reg unnormalization; then save snapshot
+            self.rpn_means = np.tile(np.asarray(cfg.TRAIN.RPN_NORMALIZE_MEANS),
+                                      num_anchor)
+            self.rpn_stds = np.tile(np.asarray(cfg.TRAIN.RPN_NORMALIZE_STDS),
+                                     num_anchor)
+            net.params['rpn_bbox_pred'][0].data[...] = \
+                (net.params['rpn_bbox_pred'][0].data *
+                 self.rpn_stds[:, np.newaxis, np.newaxis, np.newaxis])
+            net.params['rpn_bbox_pred'][1].data[...] = \
+                (net.params['rpn_bbox_pred'][1].data *
+                 self.rpn_stds + self.rpn_means)
 
         if scale_bbox_params_rfcn:
             # save original values
             orig_0 = net.params['rfcn_bbox'][0].data.copy()
             orig_1 = net.params['rfcn_bbox'][1].data.copy()
             repeat = orig_1.shape[0] / self.bbox_means.shape[0]
-                        
 
             # scale and shift with bbox reg unnormalization; then save snapshot
             net.params['rfcn_bbox'][0].data[...] = \
@@ -112,6 +128,10 @@ class SolverWrapper(object):
             # restore net to original state
             net.params['rfcn_bbox'][0].data[...] = orig_0
             net.params['rfcn_bbox'][1].data[...] = orig_1
+        if scale_bbox_params_rpn:
+            # restore net to original state
+            net.params['rpn_bbox_pred'][0].data[...] = orig_0
+            net.params['rpn_bbox_pred'][1].data[...] = orig_1
 
         return filename
 
@@ -120,23 +140,18 @@ class SolverWrapper(object):
         last_snapshot_iter = -1
         timer = Timer()
         model_paths = []
-        lossfile = open(str(t.time()) + ".txt","w")
         while self.solver.iter < max_iters:
             # Make one SGD update
             timer.tic()
             self.solver.step(1)
             timer.toc()
             if self.solver.iter % (10 * self.solver_param.display) == 0:
-	        """save loss data"""
-                net = self.solver.net
-                lossfile.write("%s,%s,%s,%s\n" %(net.blobs["loss_cls"].data, net.blobs["loss_bbox"].data, net.blobs["rpn_loss_cls"].data, net.blobs["rpn_loss_bbox"].data))
                 print 'speed: {:.3f}s / iter'.format(timer.average_time)
 
             if self.solver.iter % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = self.solver.iter
                 model_paths.append(self.snapshot())
 
-        lossfile.close()
         if last_snapshot_iter != self.solver.iter:
             model_paths.append(self.snapshot())
         return model_paths

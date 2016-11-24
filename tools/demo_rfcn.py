@@ -4,7 +4,7 @@
 # R-FCN
 # Copyright (c) 2016 Yuwen Xiong
 # Licensed under The MIT License [see LICENSE for details]
-# Updated by coder-james
+# Written by Yuwen Xiong
 # --------------------------------------------------------
 
 """
@@ -18,7 +18,7 @@ from fast_rcnn.config import cfg
 from fast_rcnn.test import im_detect
 from fast_rcnn.nms_wrapper import nms
 from utils.timer import Timer
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
 import caffe, os, sys, cv2
@@ -37,37 +37,37 @@ NETS = {'ResNet-101': ('ResNet-101',
                   'resnet50_rfcn_final.caffemodel')}
 
 
-#def vis_detections(im, class_name, dets, thresh=0.5):
-#    """Draw detected bounding boxes."""
-#    inds = np.where(dets[:, -1] >= thresh)[0]
-#    if len(inds) == 0:
-#        return
-#
-#    im = im[:, :, (2, 1, 0)]
-#    fig, ax = plt.subplots(figsize=(12, 12))
-#    ax.imshow(im, aspect='equal')
-#    for i in inds:
-#        bbox = dets[i, :4]
-#        score = dets[i, -1]
-#
-#        ax.add_patch(
-#            plt.Rectangle((bbox[0], bbox[1]),
-#                          bbox[2] - bbox[0],
-#                          bbox[3] - bbox[1], fill=False,
-#                          edgecolor='red', linewidth=3.5)
-#            )
-#        ax.text(bbox[0], bbox[1] - 2,
-#                '{:s} {:.3f}'.format(class_name, score),
-#                bbox=dict(facecolor='blue', alpha=0.5),
-#                fontsize=14, color='white')
-#
-#    ax.set_title(('{} detections with '
-#                  'p({} | box) >= {:.1f}').format(class_name, class_name,
-#                                                  thresh),
-#                  fontsize=14)
-#    plt.axis('off')
-#    plt.tight_layout()
-#    plt.draw()
+def vis_detections(im, class_name, dets, thresh=0.5):
+    """Draw detected bounding boxes."""
+    inds = np.where(dets[:, -1] >= thresh)[0]
+    if len(inds) == 0:
+        return
+
+    im = im[:, :, (2, 1, 0)]
+    fig, ax = plt.subplots(figsize=(12, 12))
+    ax.imshow(im, aspect='equal')
+    for i in inds:
+        bbox = dets[i, :4]
+        score = dets[i, -1]
+
+        ax.add_patch(
+            plt.Rectangle((bbox[0], bbox[1]),
+                          bbox[2] - bbox[0],
+                          bbox[3] - bbox[1], fill=False,
+                          edgecolor='red', linewidth=3.5)
+            )
+        ax.text(bbox[0], bbox[1] - 2,
+                '{:s} {:.3f}'.format(class_name, score),
+                bbox=dict(facecolor='blue', alpha=0.5),
+                fontsize=14, color='white')
+
+    ax.set_title(('{} detections with '
+                  'p({} | box) >= {:.1f}').format(class_name, class_name,
+                                                  thresh),
+                  fontsize=14)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.draw()
 
 def demo(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
@@ -95,7 +95,7 @@ def demo(net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-    #    vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        vis_detections(im, cls, dets, thresh=CONF_THRESH)
 
 def parse_args():
     """Parse input arguments."""
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     prototxt = os.path.join(cfg.MODELS_DIR, NETS[args.demo_net][0],
-                            'rfcn_end2end', 'test_agonistic.prototxt')
+                            'rfcn_end2end', 'test_agnostic.prototxt')
     caffemodel = os.path.join(cfg.DATA_DIR, 'rfcn_models',
                               NETS[args.demo_net][1])
 
@@ -147,4 +147,4 @@ if __name__ == '__main__':
         print 'Demo for data/demo/{}'.format(im_name)
         demo(net, im_name)
 
-    #plt.show()
+    plt.show()
