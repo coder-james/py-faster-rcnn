@@ -34,8 +34,9 @@ import numpy as np
 #        __sets[name] = (lambda split=split, year=year: coco(split, year))
 
 #add your datasets below here
-name = "something"
-__sets["pedestrian"] = (lambda name = name: common(name))
+nameset = ["base", "class", "color"]
+for name in nameset:
+  __sets[name] = (lambda name = name: common(name))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""

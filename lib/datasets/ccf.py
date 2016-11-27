@@ -21,3 +21,8 @@ def getClasses(name):
     print "function param should be 'base/class/color'"
     assert True == False
     return None
+
+if __name__ == "__main__":
+  print len(bases)
+  print len(classes)
+  print len(colors)
