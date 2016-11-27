@@ -16,15 +16,9 @@ import numpy as np
 import scipy.io as sio
 import caffe, os, sys, cv2
 import argparse
+from datasets.ccf import getClasses
 
-#CLASSES = ('__background__','woman', 'longhair', 'downjacket', 'gray', 'pants', 'black', 'singleshoulder', 'brown', 'coat', 'red', 'green', 'boots', 'man', 'shorthair', 'multicolor', 'otherbag', 'yellow', 'hat', 'backpack', 'blue', 'skirt', 'leathershoes', 'otherhair', 'purple', 'white', 'orange', 'sneakers', 'othercolor', 'othertop', 'maxiskit', 'bag', 't-shirt', 'blouse', 'western', 'shorts', 'otherdown', 'othershoes', 'handbox', 'sandal', 'otherman', 'wallet')
-#CLASSES = ('__background__','woman', 'longhair', 'downjacket', 'pants', 'singleshoulder', 'coat', 'boots', 'man', 'shorthair','otherbag', 'hat', 'backpack', 'skirt', 'leathershoes', 'otherhair', 'sneakers', 'othertop', 'maxiskit', 'bag', 't-shirt', 'blouse', 'western', 'shorts', 'otherdown', 'othershoes', 'handbox', 'sandal', 'otherman', 'wallet')
-#CLASSES = ('__background__','black', 'white', 'red', 'yellow', 'blue', 'green', 'purple', 'brown', 'gray', 'orange', 'multicolor', 'othercolor')
-CLASSES = ('__background__','head','top','down','bag','hat','shoes')
-#shoes_classes=('leathershoes','sneakers','sandal','boots','othershoes')
-#color_classes=('black','white','red','yellow','blue','green','purple','brown','gray','orange','multicolor','othercolor')
-
-def demo(net, image_dir, image_name):
+def demo(net, image_dir, image_name, type):
     """Detect object classes in an image using pre-computed object proposals."""
 
     im_file = os.path.join(image_dir, image_name)
@@ -42,6 +36,7 @@ def demo(net, image_dir, image_name):
     CONF_THRESH = 0
     NMS_THRESH = 0.3
     content = ""
+    CLASSES = getClasses(type)
     for cls_ind, cls in enumerate(CLASSES[1:]):
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
@@ -72,6 +67,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Faster R-CNN Detection')
     parser.add_argument('--gpu', dest='gpu_id', help='GPU device id to use [0]',
                         default=0, type=int)
+    parser.add_argument('--type', dest='type', help='Detect Type',
+                        default=None, type=str)
     parser.add_argument('--prototxt', dest='prototxt', help='test prototxt',
                         default=None, type=str)
     parser.add_argument('--caffemodel', dest='caffemodel', help='caffe model to use',
@@ -111,7 +108,7 @@ if __name__ == '__main__':
     content = ""
     for im_name in im_names:
         print 'Test for {:s}'.format("IMG_" + im_name + ".jpg")
-        content += demo(net, args.imagedir, "IMG_" + im_name + ".jpg") + "\n"
+        content += demo(net, args.imagedir, "IMG_" + im_name + ".jpg", args.type) + "\n"
     timer.toc()
     print ('Detection took {:.3f}s').format(timer.total_time)
     with open(args.savefile, "w") as detectfile:

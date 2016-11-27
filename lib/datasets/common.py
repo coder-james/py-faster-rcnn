@@ -28,7 +28,6 @@ class ccf_voc(imdb):
         self._data_path = os.path.join(self._devkit_path, image_set)
                          # always index 0
         self._classes = ('__background__','head','top','down','shoes','hat','bag')
-        #self._classes = ('__background__','woman', 'longhair', 'downjacket', 'gray', 'pants', 'black', 'singleshoulder', 'brown', 'coat', 'red', 'green', 'boots', 'man', 'shorthair', 'multicolor', 'otherbag', 'yellow', 'hat', 'backpack', 'blue', 'skirt', 'leathershoes', 'otherhair', 'purple', 'white', 'orange', 'sneakers', 'othercolor', 'othertop', 'maxiskit', 'bag', 't-shirt', 'blouse', 'western', 'shorts', 'otherdown', 'othershoes', 'handbox', 'sandal', 'otherman', 'wallet')
         #self._classes = ('__background__','woman', 'longhair', 'downjacket', 'pants', 'singleshoulder', 'coat', 'boots', 'man', 'shorthair','otherbag', 'hat', 'backpack', 'skirt', 'leathershoes', 'otherhair', 'sneakers', 'othertop', 'maxiskit', 'bag', 't-shirt', 'blouse', 'western', 'shorts', 'otherdown', 'othershoes', 'handbox', 'sandal', 'otherman', 'wallet')
         #self._classes = ('__background__','black', 'white', 'red', 'yellow', 'blue', 'green', 'purple', 'brown', 'gray', 'orange', 'multicolor', 'othercolor')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
