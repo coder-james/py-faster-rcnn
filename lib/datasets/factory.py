@@ -36,7 +36,7 @@ import numpy as np
 #add your datasets below here
 nameset = ["base", "class", "color"]
 for name in nameset:
-  __sets[name] = (lambda name = name: common(name))
+  __sets[name] = (lambda name = name: common("ccf", name))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""

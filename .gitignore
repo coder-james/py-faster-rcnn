@@ -8,6 +8,7 @@ output
 
 #CCF
 run.sh
+data/ccf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

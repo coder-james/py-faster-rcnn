@@ -21,15 +21,16 @@ from fast_rcnn.config import cfg
 from datasets.ccf import getClasses
 
 class common(imdb):
-    def __init__(self, image_set):
+    def __init__(self, image_set, name):
         imdb.__init__(self, image_set)
         self._image_set = image_set
+        self._type = name
         self._data_path = os.path.join(cfg.DATA_DIR, image_set)
                          # always index 0
-        self._classes = getClasses(image_set)
+        self._classes = getClasses(name)
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
-        self._image_index = self._load_image_set_index(image_set + '_imagelist.txt')
+        self._image_index = self._load_image_set_index('train_imagelist.txt')
         # Default to roidb handler
         self._roidb_handler = self.selective_search_roidb
         self._salt = str(uuid.uuid4())
@@ -79,11 +80,11 @@ class common(imdb):
         This function loads/saves from/to a cache file to speed up future calls.
         """
         timestamp = "%d" % time.time()
-        cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
+        cache_file = os.path.join(self.cache_path, self._type + '_gt_roidb.pkl')
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as fid:
                 roidb = cPickle.load(fid)
-            print '{} gt roidb loaded from {}'.format(self.name, cache_file)
+            print '{} gt roidb loaded from {}'.format(self._type, cache_file)
             return roidb
 
         gt_roidb = [self._load_ccf_annotation(index)
@@ -102,7 +103,7 @@ class common(imdb):
         This function loads/saves from/to a cache file to speed up future calls.
         """
         cache_file = os.path.join(self.cache_path,
-                                  self.name + '_selective_search_roidb.pkl')
+                                  self._type + '_selective_search_roidb.pkl')
 
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as fid:
@@ -165,7 +166,7 @@ class common(imdb):
         Load image and bounding boxes info from XML file in the CCF
         format.
         """
-        filename = os.path.join(self._data_path, "train", 'Annotations_' + self.name, index + '.xml')
+        filename = os.path.join(self._data_path, "train", 'Annotations_' + self._type, index + '.xml')
         tree = ET.parse(filename)
         objs = tree.findall('object')
         num_objs = len(objs)
