@@ -6,6 +6,9 @@ lib/pycocotools/_mask.so
 caffe
 output
 
+#CCF
+run.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
