@@ -7,8 +7,7 @@ caffe
 output
 
 #CCF
-run.sh
-data/ccf
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

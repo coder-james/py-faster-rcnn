@@ -22,6 +22,19 @@ def getClasses(name):
     assert True == False
     return None
 
+def getTestPF(name):
+  suffix = ""
+  if name == "base":
+    suffix = "7"
+  elif name == "class":
+    suffix = "30"
+  elif name == "color":
+    suffix = "13"
+  else:
+    print "function param should be 'base/class/color'"
+    assert True == False
+  return "test_agnostic" + suffix + ".prototxt"
+
 if __name__ == "__main__":
   print len(bases)
   print len(classes)

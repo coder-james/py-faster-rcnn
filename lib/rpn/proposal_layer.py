@@ -101,7 +101,6 @@ class ProposalLayer(caffe.Layer):
         anchors = self._anchors.reshape((1, A, 4)) + \
                   shifts.reshape((1, K, 4)).transpose((1, 0, 2))
         anchors = anchors.reshape((K * A, 4))
-
         # Transpose and reshape predicted bbox transformations to get them
         # into the same order as the anchors:
         #
@@ -120,7 +119,6 @@ class ProposalLayer(caffe.Layer):
 
         # Convert anchors into proposals via bbox transformations
         proposals = bbox_transform_inv(anchors, bbox_deltas)
-
         # 2. clip predicted boxes to image
         proposals = clip_boxes(proposals, im_info[:2])
 
